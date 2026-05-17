@@ -12,19 +12,17 @@ def calculate_savings(customer_info: CustomerInfo) -> SavingsEstimate:
     # Calculate recommended system size based on roof space and efficiency
     max_system_size = (customer_info.roof_size * AVERAGE_SOLAR_PANEL_EFFICIENCY) / 1000  # Convert to kW
     
-    # Calculate annual energy production
-    annual_production = (max_system_size * 1000 *  # Convert to watts
-                        customer_info.average_daily_sunlight * 365 *  # Annual hours
-                        AVERAGE_SOLAR_PANEL_EFFICIENCY)  # System efficiency
-    
+    # Calculate annual energy production (max_system_size already accounts for efficiency)
+    annual_production = max_system_size * customer_info.average_daily_sunlight * 365  # kWh
+
     # Calculate annual savings
     annual_savings = annual_production * AVERAGE_ELECTRICITY_RATE
-    
+
     # Calculate installation cost
     installation_cost = max_system_size * 1000 * AVERAGE_INSTALLATION_COST_PER_WATT
-    
+
     # Calculate payback period
-    payback_period = installation_cost / annual_savings
+    payback_period = installation_cost / annual_savings if annual_savings > 0 else 0.0
     
     # Calculate environmental impact
     environmental_impact = annual_production * CO2_REDUCTION_PER_KWH

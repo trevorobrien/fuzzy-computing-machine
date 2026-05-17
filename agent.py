@@ -132,12 +132,22 @@ def process_message(state: AgentState) -> AgentState:
             except (ValueError, TypeError):
                 return default
         
+        def clamp(value: float, lo: float, hi: float, default: float) -> float:
+            return value if lo <= value <= hi else default
+
+        monthly_cost = clamp(safe_float(info_dict.get("monthly_electricity_cost")), 0.01, 10_000, 0.0)
+        roof_size = clamp(safe_float(info_dict.get("roof_size")), 1, 100_000, 0.0)
+        sunlight = clamp(safe_float(info_dict.get("average_daily_sunlight", 4.0)), 0.1, 24, 4.0)
+        roof_type = info_dict.get("roof_type", "other")
+        if roof_type not in ("flat", "pitched", "other"):
+            roof_type = "other"
+
         customer_info = CustomerInfo(
-            monthly_electricity_cost=safe_float(info_dict.get("monthly_electricity_cost")),
-            roof_type=info_dict.get("roof_type", "other"),
-            roof_size=safe_float(info_dict.get("roof_size")),
-            location=info_dict.get("location", "unknown"),
-            average_daily_sunlight=safe_float(info_dict.get("average_daily_sunlight", 4.0)),
+            monthly_electricity_cost=monthly_cost,
+            roof_type=roof_type,
+            roof_size=roof_size,
+            location=str(info_dict.get("location", "unknown"))[:100],
+            average_daily_sunlight=sunlight,
             interested_in_installation=bool(info_dict.get("interested_in_installation", True))
         )
         
